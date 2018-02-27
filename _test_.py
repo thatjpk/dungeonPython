@@ -32,6 +32,7 @@ blue = (0, 125, 255)
 violet = (200, 0, 200)
 
 def isSteppable(funcX, funcY):
+	return gameBoard[funcX][funcY]
 
 def getBlockType(blockX, blockY): #Defining blocks in the grid
 	if(blockX == 0 or blockX == 9 or blockY == 0 or blockY == 9):
@@ -65,13 +66,21 @@ def getEntrance():
 
 def keyDown(event, funcX, funcY): #Start Movement on Key Down
 	if(event.key == K_UP or event.key == K_w):
-		funcY -= 1
+		if(funcY-1 >= 0 and funcY-1 <= 9):
+			if(isSteppable(funcX, funcY-1) != "wall" and isSteppable(funcX,funcY-1) != "border"):
+				funcY -= 1
 	elif(event.key == K_DOWN or event.key == K_s):
-		funcY += 1
+		if(funcY+1 >= 0 and funcY+1 <= 9):
+			if(isSteppable(funcX, funcY+1) != "wall" and isSteppable(funcX,funcY+1) != "border"):
+				funcY += 1
 	elif(event.key == K_LEFT or event.key == K_a):
-		funcX -= 1
+		if(funcX-1 >= 0 and funcX-1 <= 9):
+			if(isSteppable(funcX-1, funcY) != "wall" and isSteppable(funcX-1,funcY) != "border"):
+				funcX -= 1
 	elif(event.key == K_RIGHT or event.key == K_d):
-		funcX += 1
+		if(funcX+1 >= 0 and funcX+1 <= 9):
+			if(isSteppable(funcX+1, funcY) != "wall" and isSteppable(funcX+1,funcY) != "border"):
+				funcX += 1
 	return funcX, funcY
 
 def keyUp(event): #Stop Movement on Key Lift
