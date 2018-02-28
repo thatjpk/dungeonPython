@@ -16,6 +16,9 @@ yBox = 0
 randDoor = randNum(1,8)
 randBlock = randNum(1,10)
 gameBoard = []
+entrancePos = []
+exitPos = []
+pathDone = False
 
 #Neutral Colors
 white = (255, 255, 255)
@@ -35,16 +38,36 @@ def isSteppable(funcX, funcY):
 	return gameBoard[funcX][funcY]
 
 def getBlockType(blockX, blockY): #Defining blocks in the grid
+	global entrancePos, exitPos
 	if(blockX == 0 or blockX == 9 or blockY == 0 or blockY == 9):
 		if(blockY == 0 and randDoor == blockX):
+			exitPos = [randDoor,blockY]
+			print(exitPos)
 			return "exit"
 		if(blockY == 9 and randDoor == blockX):
+			entrancePos = [randDoor,blockY-1]
 			return "entrance"
 		return "border"
 	randBlock = randNum(1,10)
 	if(randBlock <= 7): return "path"
 	if(randBlock > 7 and randBlock < 10): return "wall"
 	return "actionBlock"
+
+def getDir(entrancePos):
+	global posPath
+	blockX = entrancePos[0]
+	blockY = entrancePos[1]
+	while(exitPos != [blockX,blockY-1]):
+		randomVar = randNum(1,3)
+		if(randomVar == 1 and gameBoard[blockX-1][blockY] != "border"): #Left
+			blockX -= 1
+		if(randomVar == 2 and gameBoard[blockX][blockY-1] != "border"): #Up
+			blockY -= 1
+		if(randomVar == 3 and gameBoard[blockX+1][blockY] != "border"): #Right
+			blockX += 1
+		posPath.append([blockX, blockY])
+	for x in posPath:
+		
 
 def getColor(tileType): #Coloring the blocks
 	if(tileType == "border" or tileType == "wall"):
@@ -60,8 +83,6 @@ def getEntrance():
 	for x in range(len(gameBoard)):
 		for y in range(10):
 			if(gameBoard[x][y] == "entrance"):
-				print("x: " + str(x))
-				print("y: " + str(y))
 				return x, y
 
 def keyDown(event, funcX, funcY): #Start Movement on Key Down
@@ -88,11 +109,15 @@ def keyUp(event): #Stop Movement on Key Lift
 
 #Creates the game board
 gameBoard = [["" for x in range(10)] for y in range(10)]
+posPath = []
+
 for loopY in range(0,10):
 	for loopX in range(0,10):
 		blockType = getBlockType(loopX,loopY)
 		gameBoard[loopX][loopY] = blockType
 	randDoor = randNum(1,8)
+
+getDir(entrancePos)
 
 #Sets the play position
 xBox, yBox = getEntrance()
