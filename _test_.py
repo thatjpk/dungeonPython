@@ -4,7 +4,7 @@ from pygame.locals import *
 import pygame
 pygame.init()
 
-global white, grey, black, brown, red, orange, yellow, green, blue, violet
+global white, grey, red, yellow, green, blue
 global randDoor, randBlock
 
 #Non-Color Variables
@@ -17,44 +17,41 @@ randDoor = randNum(1,8)
 randBlock = randNum(1,10)
 gameBoard = []
 entrancePos = []
-pathDone = False
+posPath = []
 
-#Neutral Colors
+#Images
+playerImg = pygame.transform.scale(pygame.image.load("pixelChar.png"), (75, 75))
+
+#Colors
 white = (255, 255, 255)
-grey = (127, 127, 127)
-black = (0, 0, 0)
-brown = (145, 90, 15)
+grey = (125, 125, 125)
 
-#Other Colors
 red = (255, 0, 0)
-orange = (255, 125, 0)
 yellow = (255, 255, 0)
 green = (0, 210, 0)
 blue = (0, 125, 255)
-violet = (200, 0, 200)
 
 def getBlockType(blockX, blockY, blockKind): #Defining blocks in the grid
 	global entrancePos
 	if(blockKind == "origPath"):
 		randBlock = randNum(1,5)
-		if(randBlock <= 3): return "path"
+		if(randBlock <= 4): return "path"
 		return "actionBlock"
 	if(blockKind == "other"):
 		if(blockX == 0 or blockX == 9 or blockY == 0 or blockY == 9):
 			if(blockY == 9 and randDoor == blockX):
 				entrancePos = [randDoor,blockY]
-				print(entrancePos)
 				return "entrance"
 			return "border"
-		randBlock = randNum(1,10)
-		if(randBlock <= 1): return "path"
-		if(randBlock > 1 and randBlock < 9): return "wall"
+		randBlock = randNum(1,25)
+		if(randBlock <= 9): return "path"
+		if(randBlock > 9 and randBlock < 24): return "wall"
 		return "actionBlock"
 
-def getDir(entrancePos):
+def getDir(entrancePos): #Creating the random path
 	global posPath
 	blockX = entrancePos[0]
-	blockY = entrancePos[1]-1
+	blockY = entrancePos[1]
 	while(blockY-1 != 0):
 		randomVar = randNum(1,3)
 		if(randomVar == 1 and gameBoard[blockX-1][blockY] != "border"): #Left
@@ -65,27 +62,9 @@ def getDir(entrancePos):
 			blockX += 1
 		posPath.append([blockX, blockY])
 	exitPos = [blockX, blockY-1]
-	print(gameBoard)
 	for x in range(len(posPath)):
-		print(gameBoard[posPath[x][0]][posPath[x][1]])
 		gameBoard[posPath[x][0]][posPath[x][1]] = getBlockType(posPath[x][0],posPath[x][1],"origPath")
 	gameBoard[exitPos[0]][exitPos[1]] = "exit"
-
-def getColor(tileType): #Coloring the blocks
-	if(tileType == "border" or tileType == "wall"):
-		return grey
-	if(tileType == "exit" or tileType == "entrance"):
-		return green
-	if(tileType == "path"):
-		return yellow
-	if(tileType == "actionBlock"):
-		return red
-
-def getEntrance():
-	for x in range(len(gameBoard)):
-		for y in range(0,10):
-			if(gameBoard[x][y] == "entrance"):
-				return x, y
 
 def keyUp(event, funcX, funcY): #Start Movement on Key Down
 	if(event.key == K_UP or event.key == K_w):
@@ -106,13 +85,18 @@ def keyUp(event, funcX, funcY): #Start Movement on Key Down
 				funcX += 1
 	return funcX, funcY
 
-def keyDown(event): #Stop Movement on Key Lift
-	pass
+def getColor(tileType): #Coloring the blocks
+	if(tileType == "border" or tileType == "wall"):
+		return grey
+	if(tileType == "exit" or tileType == "entrance"):
+		return green
+	if(tileType == "path"):
+		return yellow
+	if(tileType == "actionBlock"):
+		return red
 
-#Creates the game board
+#Createing the game board
 gameBoard = [["" for x in range(10)] for y in range(10)]
-posPath = []
-
 for loopY in range(0,10):
 	for loopX in range(0,10):
 		blockType = getBlockType(loopX,loopY,"other")
@@ -121,8 +105,8 @@ for loopY in range(0,10):
 
 getDir(entrancePos)
 
-#Sets the play position
-xBox, yBox = getEntrance()
+#Sets the player's position
+xBox, yBox = entrancePos
 
 #Creates the pygame screen
 screen = pygame.display.set_mode((displayWidth, displayHeight))
@@ -133,8 +117,6 @@ while(gameOver == False): #Main Game Loop
 	for event in pygame.event.get():
 		if(event.type == pygame.KEYUP):
 			xBox, yBox = keyUp(event, xBox, yBox)
-		if(event.type == pygame.KEYDOWN):
-			keyDown(event)
 		if(event.type == pygame.QUIT):
 			gameOver = True
 
@@ -146,7 +128,7 @@ while(gameOver == False): #Main Game Loop
 			color = getColor(gameBoard[x][y])
 			pygame.draw.rect(screen, color, (x*100, y*100, 100, 100))
 
-	pygame.draw.rect(screen, blue, ((xBox*100)+25, (yBox*100)+25, 50, 50))
+	screen.blit(playerImg,(xBox*100+12, yBox*100+12))
 
 	pygame.display.update()
 	clock.tick(60)
