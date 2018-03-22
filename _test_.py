@@ -21,6 +21,8 @@ gameBoard = []
 entrancePos = []
 posPath = []
 
+#Test
+
 #Images
 playerImg = pygame.transform.scale(pygame.image.load("pixelChar.png"), (75, 75))
 path = pygame.transform.scale(pygame.image.load("path.png"), (100,100))
