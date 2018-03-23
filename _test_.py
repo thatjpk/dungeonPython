@@ -24,11 +24,15 @@ posPath = []
 #Test
 
 #Images
-playerImg = pygame.transform.scale(pygame.image.load("pixelChar.png"), (75, 75))
-path = pygame.transform.scale(pygame.image.load("path.png"), (100,100))
-crackedPath = pygame.transform.scale(pygame.image.load("crackedPath.png"), (100,100))
-flowerPath = pygame.transform.scale(pygame.image.load("flowerPath.png"), (100,100))
-crackedFlowerPath = pygame.transform.scale(pygame.image.load("crackedFlowerPath.png"),(100,100))
+playerImg = pygame.transform.scale(pygame.image.load("gameArt/pixelChar.png"), (75, 75))
+path = pygame.transform.scale(pygame.image.load("gameArt/path.png"), (100,100))
+crackedPath = pygame.transform.scale(pygame.image.load("gameArt/cracked.path.png"), (100,100))
+flowerPath = pygame.transform.scale(pygame.image.load("gameArt/flower.path.png"), (100,100))
+crackedFlowerPath = pygame.transform.scale(pygame.image.load("gameArt/crackedFlower.path.png"),(100,100))
+aBlock = pygame.transform.scale(pygame.image.load("gameArt/aBlock.png"),(100,100))
+flowerABlock = pygame.transform.scale(pygame.image.load("gameArt/flower.aBlock.png"),(100,100))
+wall = pygame.transform.scale(pygame.image.load("gameArt/wall.png"),(100,100))
+crackedWall = pygame.transform.scale(pygame.image.load("gameArt/cracked.wall.png"),(100,100))
 
 #Colors
 white = (255, 255, 255)
@@ -57,16 +61,20 @@ def getBlockType(blockX, blockY, blockKind): #Defining blocks in the grid
 		return "actionBlock"
 
 def getArt(blockKind):
-	print(blockKind)
 	if(blockKind == "path"):
 		randomVar = randNum(1,4)
 		if(randomVar == 1): return 'path'
-		if(randomVar == 2): return 'crackedPath'
-		if(randomVar == 3): return 'flowerPath'
-		if(randomVar == 4): return 'crackedFlowerPath'
-	if(blockKind == "border"): return 'borderArt'
-	if(blockKind == "wall"): return 'wallArt'
-	if(blockKind == "actionBlock"): return 'actionBlock'
+		if(randomVar == 2): return 'cracked.path'
+		if(randomVar == 3): return 'flower.path'
+		if(randomVar == 4): return 'crackedFlower.path'
+	if(blockKind == "actionBlock"):
+		randomVar = randNum(1,2)
+		if(randomVar == 1): return 'aBlock'
+		if(randomVar == 2): return 'flower.aBlock'
+	if(blockKind == "wall" or blockKind == "border"):
+		randomVar = randNum(1,2)
+		if(randomVar == 1): return "wall"
+		if(randomVar == 2): return "cracked.wall"
 	if(blockKind == "entrance"): return 'entranceArt'
 	if(blockKind == "exit"): return 'exitArt'
 
@@ -120,7 +128,10 @@ getDir(entrancePos)
 #Making art for the game after the path is generated
 for loopY in range(0,10):
 	for loopX in range(0,10):
-		art = getArt(gameBoard[loopX][loopY][0])
+		if(loopX == entrancePos[0] and loopY == entrancePos[1]):
+			art = getArt("entrance")
+		else:
+			art = getArt(gameBoard[loopX][loopY][0])
 		gameBoard[loopX][loopY].append(art)
 
 #Sets the player's position
@@ -142,13 +153,9 @@ while(gameOver == False): #Main Game Loop
 	#Prints the two-dimensional array to the screen
 	for x in range(len(gameBoard)):
 		for y in range(10):
-			if(gameBoard[x][y][1][len(gameBoard[x][y][1])-4:len(gameBoard[x][y][1])].lower() == "path"):
-				screen.blit(pygame.transform.scale(pygame.image.load(str(gameBoard[x][y][1]) + ".png"), (100,100)),(x*100, y*100))
-			if(gameBoard[x][y][1] == "borderArt"): pygame.draw.rect(screen, grey, (x*100, y*100, 100, 100))
-			if(gameBoard[x][y][1] == "wallArt"): pygame.draw.rect(screen, grey, (x*100, y*100, 100, 100))
-			if(gameBoard[x][y][1] == "actionBlock"): pygame.draw.rect(screen, red, (x*100, y*100, 100, 100))
-			if(gameBoard[x][y][1] == "entrance"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
-			if(gameBoard[x][y][1] == "exit"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
+			if(gameBoard[x][y][1] == "entranceArt"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
+			elif(gameBoard[x][y][1] == "exitArt"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
+			else: screen.blit(pygame.transform.scale(pygame.image.load("gameArt/" + str(gameBoard[x][y][1]) + ".png"), (100,100)),(x*100, y*100))
 
 	screen.blit(playerImg,(xBox*100+12, yBox*100+12))
 
