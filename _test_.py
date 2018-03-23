@@ -33,6 +33,8 @@ aBlock = pygame.transform.scale(pygame.image.load("gameArt/aBlock.png"),(100,100
 flowerABlock = pygame.transform.scale(pygame.image.load("gameArt/flower.aBlock.png"),(100,100))
 wall = pygame.transform.scale(pygame.image.load("gameArt/wall.png"),(100,100))
 crackedWall = pygame.transform.scale(pygame.image.load("gameArt/cracked.wall.png"),(100,100))
+door = pygame.transform.scale(pygame.image.load("gameArt/door.png"),(100,100))
+flowerDoor = pygame.transform.scale(pygame.image.load("gameArt/flower.door.png"),(100,100))
 
 #Colors
 white = (255, 255, 255)
@@ -75,8 +77,10 @@ def getArt(blockKind):
 		randomVar = randNum(1,2)
 		if(randomVar == 1): return "wall"
 		if(randomVar == 2): return "cracked.wall"
-	if(blockKind == "entrance"): return 'entranceArt'
-	if(blockKind == "exit"): return 'exitArt'
+	if(blockKind == "entrance" or blockKind == "exit"):
+		randVar = randNum(1,2)
+		if(randVar == 1): return 'door'
+		if(randVar == 2): return 'flower.door'
 
 def getDir(entrancePos): #Creating the random path
 	global posPath
@@ -153,9 +157,7 @@ while(gameOver == False): #Main Game Loop
 	#Prints the two-dimensional array to the screen
 	for x in range(len(gameBoard)):
 		for y in range(10):
-			if(gameBoard[x][y][1] == "entranceArt"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
-			elif(gameBoard[x][y][1] == "exitArt"): pygame.draw.rect(screen, green, (x*100, y*100, 100, 100))
-			else: screen.blit(pygame.transform.scale(pygame.image.load("gameArt/" + str(gameBoard[x][y][1]) + ".png"), (100,100)),(x*100, y*100))
+			screen.blit(pygame.transform.scale(pygame.image.load("gameArt/" + str(gameBoard[x][y][1]) + ".png"), (100,100)),(x*100, y*100))
 
 	screen.blit(playerImg,(xBox*100+12, yBox*100+12))
 
