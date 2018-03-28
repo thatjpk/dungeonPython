@@ -16,7 +16,7 @@ scene = 'startPage'
 gameOver = False
 imageType = None
 firstTime = True
-randDoor = randNum(1,8)
+randDoor = 0
 randBlock = randNum(1,10)
 gameBoard = []
 entrancePos = []
@@ -52,8 +52,8 @@ def getBlockType(blockX, blockY, blockKind): #Defining blocks in the grid
 		if(randBlock <= 4): return 'path'
 		return 'actionBlock'
 	if(blockKind == 'other'):
-		if(blockX == 0 or blockX == 9 or blockY == 0 or blockY == 9):
-			if(blockY == 9 and randDoor == blockX):
+		if(blockX == 0 or blockX == 13 or blockY == 0 or blockY == 7):
+			if(blockY == 7 and randDoor == blockX):
 				entrancePos = [randDoor,blockY]
 				return 'entrance'
 			return 'border'
@@ -84,20 +84,21 @@ def getArt(blockKind): #Gets the Random Art for that type
 
 def getDir(entrancePos): #Creating the random path
 	global posPath
+	print(gameBoard)
 	blockX = entrancePos[0]
 	blockY = entrancePos[1]
 	while(blockY-1 != 0):
 		randomVar = randNum(1,3)
-		if(randomVar == 1 and gameBoard[blockX-1][blockY][0] != 'border'): #Left
+		if(randomVar == 1 and gameBoard[blockY-1][blockX][0] != 'border'): #Left
 			blockX -= 1
-		if(randomVar == 2 and gameBoard[blockX][blockY-1][0] != 'border'): #Up
+		if(randomVar == 2 and gameBoard[blockY][blockX-1][0] != 'border'): #Up
 			blockY -= 1
-		if(randomVar == 3 and gameBoard[blockX+1][blockY][0] != 'border'): #Right
+		if(randomVar == 3 and gameBoard[blockY+1][blockX][0] != 'border'): #Right
 			blockX += 1
 		posPath.append([blockX, blockY])
 	exitPos = [blockX, blockY-1]
 	for x in range(len(posPath)):
-		gameBoard[posPath[x][0]][posPath[x][1]] = [getBlockType(posPath[x][0],posPath[x][1],'origPath')]
+		gameBoard[[posPath[x][1]posPath[x][0]]] = [getBlockType(posPath[x][1],posPath[x][0],'origPath')]
 	gameBoard[exitPos[0]][exitPos[1]] = ['exit']
 
 def keyUp(event, funcX, funcY): #Start Movement on Key Down
@@ -120,23 +121,24 @@ def keyUp(event, funcX, funcY): #Start Movement on Key Down
 	return funcX, funcY
 
 #Createing the game board
-gameBoard = [[[''] for x in range(10)] for y in range(10)]
-for loopY in range(0,10):
-	for loopX in range(0,10):
+gameBoard = [[[''] for x in range(0,14)] for y in range(0,8)]
+for loopY in range(0,14):
+	if(loopY == 1): randDoor = 7
+	if(loopY == 13): randDoor = 7
+	for loopX in range(0,8):
 		blockType = getBlockType(loopX,loopY,'other')
 		gameBoard[loopX][loopY][0] = blockType
-	randDoor = randNum(1,8)
 
 getDir(entrancePos) #Generates Random Path
 
 #Making art for the game after the path is generated
-for loopY in range(0,10):
-	for loopX in range(0,10):
-		if(loopX == entrancePos[0] and loopY == entrancePos[1]):
+for loopX in range(0,14):
+	for loopY in range(0,8):
+		if(loopY == entrancePos[0] and loopX == entrancePos[1]):
 			art = getArt('entrance')
 		else:
-			art = getArt(gameBoard[loopX][loopY][0])
-		gameBoard[loopX][loopY].append(art)
+			art = getArt(gameBoard[loopY][loopX][0])
+		gameBoard[loopY][loopX].append(art)
 
 xBox, yBox = entrancePos #Sets the player's position
 
@@ -144,8 +146,6 @@ xBox, yBox = entrancePos #Sets the player's position
 screen = pygame.display.set_mode((displayWidth, displayHeight))
 pygame.display.set_caption('Dungeon Game')
 clock = pygame.time.Clock()
-
-startButton = pygame.draw.rect(screen, blue,(400,700,200,100))
 
 #Main Game Loop
 while(gameOver == False):
@@ -167,8 +167,8 @@ while(gameOver == False):
 	elif(scene == 'game'):
 		#Prints the two-dimensional array to the screen
 		for x in range(len(gameBoard)):
-			for y in range(10):
-				screen.blit(pygame.transform.scale(pygame.image.load('gameArt/' + str(gameBoard[x][y][1]) + '.png'), (100,100)),(x*100, y*100))
+			for y in range(0,14):
+				screen.blit(pygame.transform.scale(pygame.image.load('gameArt/' + str(gameBoard[x][y][1]) + '.png'), (100,100)),(y*100, x*100))
 
 		screen.blit(playerImg,(xBox*100+12, yBox*100+12))
 
