@@ -2,10 +2,18 @@ from sys import exit as endGame
 from random import randint as randNum
 from pygame.locals import *
 import pygame
+import sys
 pygame.init()
 
 global white, grey, red, yellow, green, blue
 global randDoor, randBlock
+
+# Board size constants
+X_SIZE = 10
+Y_SIZE = 10
+# Maximum index for board coordinates
+X_MAX = X_SIZE - 1
+Y_MAX = Y_SIZE - 1
 
 #Non-Color Variables
 displayWidth = 1000
@@ -16,11 +24,13 @@ scene = 'startPage'
 gameOver = False
 imageType = None
 firstTime = True
-randDoor = randNum(1,8)
+randDoor = randNum(1,X_MAX-1)
 randBlock = randNum(1,10)
 gameBoard = []
 entrancePos = []
 posPath = []
+
+print("first randDoor:{}".format(randDoor))
 
 #Images
 startScreen = pygame.transform.scale(pygame.image.load('gameArt/startScreen.png'),(1000,1000))
@@ -45,6 +55,18 @@ yellow = (255, 255, 0)
 green = (0, 210, 0)
 blue = (0, 125, 255)
 
+def printBoard():
+	column_width = 16
+	print("     ", end="")
+	for x in range(X_SIZE):
+		print("x={}".format(x).ljust(column_width), end="")
+	sys.stdout.write("\n")
+	for y in range(Y_SIZE):
+		print("y={} (".format(y), end="")
+		for x in range(X_SIZE):
+			    print("{}".format(gameBoard[y][x]).ljust(column_width), end="")
+		print(")")
+
 def getBlockType(blockX, blockY, blockKind): #Defining blocks in the grid
 	global entrancePos
 	if(blockKind == 'origPath'):
@@ -52,9 +74,10 @@ def getBlockType(blockX, blockY, blockKind): #Defining blocks in the grid
 		if(randBlock <= 4): return 'path'
 		return 'actionBlock'
 	if(blockKind == 'other'):
-		if(blockX == 0 or blockX == 9 or blockY == 0 or blockY == 9):
-			if(blockY == 9 and randDoor == blockX):
+		if(blockX == 0 or blockX == X_MAX or blockY == 0 or blockY == Y_MAX):
+			if(blockY == Y_MAX and randDoor == blockX):
 				entrancePos = [randDoor,blockY]
+				print("getBlockType set entrancePos:{}".format(entrancePos))
 				return 'entrance'
 			return 'border'
 		randBlock = randNum(1,25)
@@ -86,14 +109,25 @@ def getDir(entrancePos): #Creating the random path
 	global posPath
 	blockX = entrancePos[0]
 	blockY = entrancePos[1]
+	print("in getDir, entrancePos: {}".format(entrancePos))
+	print("in getDir, len(gameBoard):{} len(gameBoard[blockY]):{}".format(len(gameBoard), len(gameBoard[blockY])))
 	while(blockY-1 != 0):
 		randomVar = randNum(1,3)
 		if(randomVar == 1 and gameBoard[blockY][blockX-1][0] != 'border'): #Left
 			blockX -= 1
+			print("path left  to x:{},y:{}".format(blockX, blockY))
 		if(randomVar == 2 and gameBoard[blockY-1][blockX][0] != 'border'): #Up
 			blockY -= 1
+			print("path up    to x:{},y:{}".format(blockX, blockY))
+		if blockX+1 > X_MAX:
+			# Not sure why, but sometimes the path goes off the right side.
+			# When this happens, this line will make the program drop into
+			# the debugger (otherwise it will index-oob at the marker below).
+			import pdb; pdb.set_trace()
+			#                              -v-
 		if(randomVar == 3 and gameBoard[blockY][blockX+1][0] != 'border'): #Right
 			blockX += 1
+			print("path right to x:{},y:{}".format(blockX, blockY))
 		posPath.append([blockX, blockY])
 	exitPos = [blockX, blockY-1]
 	for i in range(len(posPath)):
@@ -102,19 +136,19 @@ def getDir(entrancePos): #Creating the random path
 
 def keyUp(event, funcX, funcY): #Start Movement on Key Down
 	if(event.key == K_UP or event.key == K_w):
-		if(funcY-1 >= 0 and funcY-1 <= 9):
+		if(funcY-1 >= 0 and funcY-1 <= Y_MAX):
 			if(gameBoard[funcY-1][funcX][0] != 'wall' and gameBoard[funcY-1][funcX][0] != 'border'):
 				funcY -= 1
 	elif(event.key == K_DOWN or event.key == K_s):
-		if(funcY+1 >= 0 and funcY+1 <= 9):
+		if(funcY+1 >= 0 and funcY+1 <= Y_MAX):
 			if(gameBoard[funcY+1][funcX][0] != 'wall' and gameBoard[funcY+1][funcX][0] != 'border'):
 				funcY += 1
 	elif(event.key == K_LEFT or event.key == K_a):
-		if(funcX-1 >= 0 and funcX-1 <= 9):
+		if(funcX-1 >= 0 and funcX-1 <= X_MAX):
 			if(gameBoard[funcY][funcX-1][0] != 'wall' and gameBoard[funcY][funcX-1][0] != 'border'):
 				funcX -= 1
 	elif(event.key == K_RIGHT or event.key == K_d):
-		if(funcX+1 >= 0 and funcX+1 <= 9):
+		if(funcX+1 >= 0 and funcX+1 <= X_MAX):
 			if(gameBoard[funcY][funcX+1][0] != 'wall' and gameBoard[funcY][funcX+1][0] != 'border'):
 				funcX += 1
 	return funcX, funcY
@@ -124,18 +158,20 @@ def keyUp(event, funcX, funcY): #Start Movement on Key Down
 # indexes in [y][x] order because the x positions are in the inner arrays, and
 # the y positions are in the outer array.
 # (See https://en.wikipedia.org/wiki/Row-_and_column-major_order )
-gameBoard = [[[''] for x in range(10)] for y in range(10)]
-for loopY in range(0,10):
-	for loopX in range(0,10):
+gameBoard = [[[''] for x in range(X_SIZE)] for y in range(Y_SIZE)]
+for loopY in range(Y_SIZE):
+	for loopX in range(X_SIZE):
 		blockType = getBlockType(loopX,loopY,'other')
 		gameBoard[loopY][loopX][0] = blockType
-	randDoor = randNum(1,8)
+	randDoor = randNum(1, X_MAX-1)
+	print("other randDoor:{}".format(randDoor))
 
 getDir(entrancePos) #Generates Random Path
+printBoard()
 
 #Making art for the game after the path is generated
-for loopY in range(0,10):
-	for loopX in range(0,10):
+for loopY in range(0,Y_SIZE):
+	for loopX in range(0,X_SIZE):
 		if(loopX == entrancePos[0] and loopY == entrancePos[1]):
 			art = getArt('entrance')
 		else:
