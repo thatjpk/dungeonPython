@@ -9,8 +9,8 @@ global white, grey, red, yellow, green, blue
 global randDoor, randBlock
 
 # Board size constants
-X_SIZE = 10
-Y_SIZE = 10
+X_SIZE = 7
+Y_SIZE = 4
 # Maximum index for board coordinates
 X_MAX = X_SIZE - 1
 Y_MAX = Y_SIZE - 1
